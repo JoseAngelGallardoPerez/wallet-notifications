@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package velmie.wallet.notifications;
+option go_package = "notifications";
+
+service NotificationHandler {
+    rpc Dispatch(Request) returns (Response);
+    rpc GetSettings(SettingsRequest) returns (SettingsResponse);
+    rpc GetUserSettings(UserSettingsRequest) returns (UserSettingsResponse);
+}
+
+message SettingsRequest {
+    repeated string settingNames = 1;
+}
+
+message SettingsResponse {
+    repeated Setting settings = 1;
+}
+
+message Setting {
+    string name = 1;
+    string value = 2;
+}
+
+message UserSettingsRequest {
+    string notificationName = 1;
+}
+
+message UserSettingsResponse {
+    repeated UsersSetting userSettings = 1;
+}
+
+message UsersSetting {
+    string notificationName = 1;
+    string uid = 2;
+}
+
+message Request {
+    string to = 1;
+    string eventName = 2;
+    templateData templateData = 3;
+    repeated string notifiers = 4;
+}
+
+message Response {
+    string status = 1;
+    Error error = 2;
+}
+
+message Error {
+    string title = 1;
+    string details = 2;
+}
+
+message templateData {
+    string userName = 1;
+    string firstName = 2;
+    string lastName = 3;
+    string siteName = 4;
+    string siteLoginUrl = 5;
+    string logo = 6;
+    string oneTimeLoginUrl = 7;
+    string privateMessageRecipient = 8;
+    string privateMessageAuthor = 9;
+    string privateMessageUrl = 10;
+    string privateMessageRecipientEditUrl = 11;
+    string reason = 12;
+    string link = 13;
+    string documentName = 14;
+    string tan = 15;
+    string siteUrl = 16;
+    string password = 17;
+    string entityType = 18;
+	uint64 entityID = 19;
+	uint64 messageUnreadedCount = 20;
+    string senderID = 21;
+    string verificationLink = 22;
+    string accountNumber = 23;
+    uint64 transactionId = 24;
+    string confirmationCode = 25;
+    string setPasswordConfirmationCode = 26;
+    uint64 requestId = 27;
+    uint64 count = 28;
+    string invoiceID = 29;
+    string supplierCompany = 30;
+    string funderCompany = 31;
+    string date = 32;
+    string platformAdmin = 33;
+    string staffFirstName = 34;
+    string ownerFirstName = 35;
+    string ownerLastName = 36;
+}

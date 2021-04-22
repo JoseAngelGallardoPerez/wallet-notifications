@@ -1,0 +1,898 @@
+openapi: 3.0.0
+servers:
+  - url: http://localhost
+    description: Local Api
+info:
+  version: '0.0.1'
+  title: 'Wallet notifications service'
+  description: 'Wallet notifications service'
+security:
+  - bearerAuth: []
+tags:
+  - name: Settings
+    description: common settings
+  - name: Templates
+    description: notification templates
+  - name: Test
+    description: test smtp
+paths:
+  /notifications/private/v1/user-settings/{uid}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin user settings
+      summary: Get list of settings
+      description: Returns the list of settings. Available for admins with "view_admin_profiles" permission if {uid} belongs to an admin user or "view_user_profiles" permission if {uid} belongs to a client.
+      operationId: GetAdminUserSettingsHandler
+      parameters:
+        - name: uid
+          in: path
+          description: The id of user field that needs to be fetched.
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettings'
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Admin user settings
+      summary: Updated user settings
+      description: Updates a user settings. Available for admins with "view_admin_profiles" permission if {uid} belongs to an admin user or "view_user_profiles" permission if {uid} belongs to a client.
+      operationId: UpdateAdminUserSettingsHandler
+      parameters:
+        - name: uid
+          in: path
+          description: The id of user field that needs to be fetched.
+          required: true
+          schema:
+            type: string
+      responses:
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '204':
+          description: No Content
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrors'
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSettings'
+        description: Updated user field object
+        required: true
+  /notifications/private/v1/user-settings:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - User settings
+      summary: Get list of settings
+      description: Returns the list of settings
+      operationId: GetSettingsHandler
+      responses:
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettings'
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - User settings
+      summary: Updated user settings
+      description: Updates a user settings.
+      operationId: UpdateUserSettingsHandler
+      responses:
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '204':
+          description: No Content
+        '422':
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrors'
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSettings'
+        description: Updated user field object
+        required: true
+  /notifications/private/v1/settings:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Settings
+      summary: Shows a list of all settings.
+      description: Shows a list of all settings. Available for admins with "view_modify_settings" permission.
+      operationId: GetUserSettingsHandler
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllSettings'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Settings
+      summary: Updates settings.
+      description: Update settings. Available for admins with "view_modify_settings" permission.
+      operationId: UpdateSettingsHandler
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAllSettings'
+        required: true
+      responses:
+        '204':
+          description: Successful
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '422':
+          description: Status Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrors'
+        '500':
+          description: Internal server error
+  /notifications/private/v1/settings/tokens:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Settings
+      summary: Returns notification tokens list.
+      description: Get notification tokens list. Available for admins with "view_modify_settings" permission.
+      operationId: GetTokens
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tokens'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+
+  /notifications/public/v1/settings/email-from:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Settings
+      summary: Shows email-from setting.
+      operationId: GetEmailFromSettingHandler
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicSetting'
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+
+  /notifications/private/v1/templates/{scope}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Templates
+      summary: Shows a list of email templates.
+      description: Shows a list of email templates. Available for admins with "view_modify_settings" permission.
+      operationId: GetTemplatesHandler
+      parameters:
+        - name: scope
+          in: path
+          description: A scope of email templates.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AllTemplates'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '500':
+          description: Internal server error
+
+  /notifications/private/v1/templates:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - Templates
+      summary: Updates templates.
+      operationId: UpdateTemplatesHandler
+      description: Update templates. Available for admins with "view_modify_settings" permission.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAllTemplates'
+        required: true
+      responses:
+        '204':
+          description: Successful
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '422':
+          description: Status Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrors'
+        '500':
+          description: Internal server error
+
+  /notifications/private/v1/notifiers/{provider}/details:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - Notifiers
+      summary: Shows provider details.
+      description: Get provider detailsAvailable for admins with "view_modify_settings" permission.
+      operationId: GetProviderDetails
+      parameters:
+        - name: provider
+          in: path
+          description: Provider name.
+          required: true
+          schema:
+            type: string
+            enum:
+              - plivo
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PlivoDetails'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '424':
+          description: Invalid provider API keys are given
+        '500':
+          description: Internal server error
+
+  /notifications/private/v1/test/smtp:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - Test
+      summary: Sends test email to adress from settings.
+      description: Sends test email to adress from settings. Available for admins with "view_modify_settings" permission.
+      operationId: SendTestEmailHandler
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendTestEmail'
+        required: true
+      responses:
+        '204':
+          description: Successful
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Status Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrors'
+        '500':
+          description: Internal server error
+  /notifications/private/v1/test/sms:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Test
+      summary: Sends test sms to specified phone number.
+      description: Sends test sms to specified phone number.
+      operationId: SendTestSMSHandler
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                number:
+                  type: string
+                provider:
+                  type: string
+                  description: Code of provider. The system will get the provider code from settings if you do not provide a value.
+                  enum:
+                    - plivo
+                    - twilio
+        required: true
+      responses:
+        '204':
+          description: Successful
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Status Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrors'
+        '500':
+          description: Internal server error
+  /notifications/private/v1/test/push:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Test
+      summary: Sends test push notification to a specified push token.
+      operationId: SendTestPushHandler
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestPush'
+        required: true
+      responses:
+        '204':
+          description: Successful
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Status Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrors'
+        '500':
+          description: Internal server error
+
+  /notifications/private/v1/push-tokens:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Push tokens
+      summary: Add a new push token to the system.
+      operationId: PostPushToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddPushToken'
+        required: true
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PushToken'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Status Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrors'
+        '500':
+          description: Internal server error
+  /notifications/private/v1/push-tokens/delete:
+    post:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Push tokens
+      summary: Delete push token from the system.
+      operationId: DeletePushToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemovePushToken'
+        required: true
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '422':
+          description: Status Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrors'
+        '500':
+          description: Internal server error
+
+  /notifications/private/v1/push-tokens/user/{uid}:
+    get:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Push tokens
+      summary: Get list of push tokens for a particular user
+      description: Available only for admins
+      operationId: GetPushTokens
+      parameters:
+        - name: uid
+          in: path
+          description: User ID.
+          required: true
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: Sorts records. Can be sorted in DESC direction by adding "-" prefix.
+          schema:
+            type: string
+            enum:
+              - os
+              - name
+              - deviceId
+              - createdAt
+              - updatedAt
+        - name: filter[os]
+          in: query
+          description: Applies filter by "os".
+          schema:
+            type: string
+        - name: filter[name:like]
+          in: query
+          description: Applies filter by "name".
+          schema:
+            type: string
+        - name: filter[deviceId]
+          in: query
+          description: Applies filter by "deviceId".
+          schema:
+            type: string
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/PageNumber'
+      responses:
+        '200':
+          description: Successful request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PushToken'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal server error
+components:
+  schemas:
+    UpdateAllSettings:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/UpdateSettings"
+      required:
+        - data
+    UpdateSettings:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "smtp_port"
+          maxLength: 255
+        value:
+          type: string
+          example: "25"
+          maxLength: 255
+        description:
+          type: string
+          example: "SMTP port"
+          maxLength: 255
+      required:
+        - name
+    AllSettings:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Setting"
+    Tokens:
+      type: "object"
+      properties:
+        data:
+          type: "string"
+          example: "[UserName]<br/>[FirstName]<br/>[LastName]<br/>[SiteName]<br/>[SiteLoginURL]<br/>[Logo]<br/>[OneTimeLoginURL]<br/>[PrivateMessageRecipient]<br/>[PrivateMessageAuthor]<br/>[PrivateMessageURL]<br/>[PrivateMessageRecipientEditURL]<br/>[Reason]<br/>[Link]<br/>[DocumentName]<br/>[Otp]<br/>[SiteURL]<br/>[PasswordRecoveryURL]<br/>[SiteLoginURL]<br/>"
+    UserSettings:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            email_notification_dormant_profile_admin:
+              type: string
+            email_notification_unread_news_available:
+              type: string
+            email_notification_when_easytransac_transaction_fail:
+              type: string
+            email_notification_when_funds_added:
+              type: string
+            email_notification_when_internal_message:
+              type: string
+            email_notification_when_login_fails:
+              type: string
+            email_notification_when_new_file_uploaded:
+              type: string
+            email_notification_when_transfer_request_created:
+              type: string
+            internal_notification_when_back_to_pending:
+              type: string
+            internal_notification_when_cancel:
+              type: string
+            internal_notification_when_cancel_pending:
+              type: string
+            internal_notification_when_cancel_processed:
+              type: string
+            internal_notification_when_executed:
+              type: string
+            internal_notification_when_processed:
+              type: string
+            internal_notification_when_processed_was_executed:
+              type: string
+            internal_notification_when_received_transfer:
+              type: string
+    Setting:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: uint64
+          example: 22
+        name:
+          type: string
+          example: "smtp_password"
+        value:
+          type: string
+          example: "4daf4e44e0a4ere14ew"
+        description:
+          type: string
+          example: "SMTP password"
+        createdAt:
+          type: string
+          format: date-time
+          example: "2020-01-30T14:58:57Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2020-01-30T14:58:57Z"
+    PublicSetting:
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+    UpdateAllTemplates:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/UpdateTemplate"
+      required:
+        - data
+    UpdateTemplate:
+      type: object
+      properties:
+        id:
+          type: number
+          example: "1"
+        legend:
+          type: string
+          example: "Account alerts"
+        subject:
+          type: string
+          example: "Username or password changed"
+        content:
+          type: string
+          example: "Plain text"
+        status:
+          type: string
+          enum:
+            - enabled
+            - disabled
+      required:
+        - id
+        - title
+        - subject
+        - content
+    AllTemplates:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Template"
+    Template:
+      type: object
+      properties:
+        id:
+          type: number
+          example: "1"
+        title:
+          type: string
+          example: "Username & password change"
+        scope:
+          type: string
+          example: "admin"
+        legend:
+          type: string
+          example: "Account alerts"
+        subject:
+          type: string
+          example: "Username or password changed"
+        content:
+          type: string
+          example: "Plain text"
+        status:
+          type: string
+          enum:
+            - enabled
+            - disabled
+        createdAt:
+          type: string
+          format: date-time
+          example: "2020-01-30T14:58:57Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2020-01-30T14:58:57Z"
+        sort:
+          type: integer
+          format: uint64
+          example: 22
+    SendTestEmail:
+      type: "object"
+      properties:
+        data:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/UpdateSettings"
+      required:
+        - data
+    ValidationErrors:
+      type: object
+      properties:
+        errors:
+          type: object
+          properties:
+            SomeField1:
+              type: string
+            SomeField2:
+              type: string
+            SomeField3:
+              type: string
+    PlivoDetails:
+      type: object
+      properties:
+        accountType:
+          type: string
+        address:
+          type: string
+        apiId:
+          type: string
+        authId:
+          type: string
+        billingMode:
+          type: string
+        cashCredits:
+          type: string
+        city:
+          type: string
+        name:
+          type: string
+        resourceUri:
+          type: string
+        state:
+          type: string
+        timezone:
+          type: string
+    AddPushToken:
+      type: object
+      properties:
+        deviceId:
+          type: string
+        name:
+          type: string
+        os:
+          type: string
+        pushToken:
+          type: string
+      required:
+        - deviceId
+        - pushToken
+    RemovePushToken:
+      type: object
+      properties:
+        pushToken:
+          type: string
+      required:
+        - pushToken
+    PushToken:
+      type: object
+      properties:
+        deviceId:
+          type: string
+        name:
+          type: string
+        os:
+          type: string
+        pushToken:
+          type: string
+        uid:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          example: "2020-01-30T14:58:57Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2020-01-30T14:58:57Z"
+    TestPush:
+      type: object
+      properties:
+        pushToken:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+    Pagination:
+      type: object
+      properties:
+        totalRecord:
+          type: number
+          example: 535
+        totalPage:
+          type: number
+          example: 26
+        limit:
+          type: number
+          example: 20
+        currentPage:
+          type: number
+          example: 1
+  parameters:
+    PageSize:
+      name: page[size]
+      in: query
+      description: Specifies count of objects returned in response. Default value is 20.
+      schema:
+        type: string
+    PageNumber:
+      name: page[number]
+      in: query
+      description: Specifies page number to be shown in response. size + number makes offset for records. Default value is 1.
+      schema:
+        type: string
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
